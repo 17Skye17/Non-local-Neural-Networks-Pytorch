@@ -20,5 +20,5 @@ Well, this confuses me, I still can't figure out what is wrong except for parame
 If anyone could offer some help, I'd be grateful. : )
 
 ## Ref:
-### [https://github.com/AlexHex7/Non-local_pytorch](https://github.com/AlexHex7/Non-local_pytorch)
-### [https://github.com/facebookresearch/video-nonlocal-net](https://github.com/facebookresearch/video-nonlocal-net)
+- [https://github.com/AlexHex7/Non-local_pytorch](https://github.com/AlexHex7/Non-local_pytorch)
+- [https://github.com/facebookresearch/video-nonlocal-net](https://github.com/facebookresearch/video-nonlocal-net)
