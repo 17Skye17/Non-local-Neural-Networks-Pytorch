@@ -1,0 +1,7 @@
+gen-crop-videos/filter_clipsListFile.hdf5
+gen-crop-videos/waste/clipsListFile.hdf5
+waste/sample-clipsListFile.hdf5
+waste/filtered_sample.hdf5
+waste/new-clipsListFile.hdf5
+waste/
+gen-crop-videos/waste
