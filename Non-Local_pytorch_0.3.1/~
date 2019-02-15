@@ -1,0 +1,75 @@
+import pickle
+import torch
+from torch.autograd import Variable
+from lib.network import ResNet
+
+model_path='/home/skye/DeepLearningPJ/video-nonlocal-net/checkpoints/c2d_baseline_32x2_IN_pretrain_400k.pkl'
+
+model_weights = pickle.load(open('/home/skye/DeepLearningPJ/video-nonlocal-net/checkpoints/c2d_baseline_32x2_IN_pretrain_400k.pkl','rb'),encoding='latin1')
+caffe_data = model_weights['blobs']
+#keys = model_weights['blobs'].keys()
+#print(len(keys))
+
+def check_params():
+    pass
+
+def argparser(caffe_params,pytorch_params):
+    assert len(caffe_params) == len(pytorch_params),'number of caffe params={}  vs pytorch params={}'.format(len(caffe_params),len(pytorch_params))
+    name_map = {}
+    name_map['layer1'] = 'res2'
+    name_map['layer2'] = 'res3'
+    name_map['layer3'] = 'res4'
+    name_map['layer4'] = 'res5'
+    name_map['downsample'] = 'branch1'
+    name_map['fc.weight'] = 'pred_w'
+    name_map['fc.bias'] = 'pred_b'
+    name_map['conv1.weight'] = 'conv1_w'
+    name_map['bn1.weight'] = 'res_conv1_bn_s'
+    name_map['bn1.bias'] = 'res_conv1_bn_b'
+    
+    layers = ['layer1','layer2','layer3','layer4']
+    for key in pytorch_params:
+        for layer in layers:
+            if layer in key:
+                py_items = key.split('.')
+                py_items[0] = name_map[py_items[0]]
+                if py_items[2][-1] == 1:
+                    py_items[2] = 'branch2a'
+                if py_items[2][-1] == 2:
+                    py_items[2] = 'branch2b'
+                if py_items[2][-1] == 3:
+                    py_items[2] = 'branch2c'
+
+    #print (caffe_params.keys(),pytorch_params.keys())
+
+
+
+caffe_params = {}
+for key in caffe_data.keys():
+#    if torch.tensor(caffe_data[key]).requires_grad:        
+        remove_voc = ['momentum','rm','riv','lr','iter']
+        ADD_FLAG = True
+        for voc in remove_voc:
+            if voc in key:
+                ADD_FLAG = False
+        if ADD_FLAG:
+            caffe_params[key] = caffe_data[key]
+        #    if "branch1" in key:
+#            print (key)
+print (len(caffe_params))
+
+img = Variable(torch.randn(1,3,32,224,224))
+net = ResNet.resnet50()
+
+pytorch_params = {}
+for name,param in net.named_parameters():
+    if param.requires_grad:
+        pytorch_params[name] = param
+        #if "downsample" in name:
+        print (name)
+print(len(pytorch_params))
+out = net(img)
+#print (out.size())
+
+argparser(caffe_params,pytorch_params)
+#check_params(caffe_params,pytorch_params)
