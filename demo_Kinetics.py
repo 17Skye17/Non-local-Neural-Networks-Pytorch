@@ -41,10 +41,8 @@ pretrained_model_path = '/home/skye/DeepLearningPJ/video-nonlocal-net/checkpoint
 hdf5_file = 'gen-crop-videos/filter_clipsListFile.hdf5'
 video = videoDataset(hdf5_file,3,32,224,224)
 
-train_loader = Data.DataLoader(dataset=video, batch_size=128, shuffle=True)
 test_loader = Data.DataLoader(dataset=video, batch_size=128, shuffle=False)
 #
-train_batch_num = len(train_loader)
 test_batch_num = len(test_loader)
 
 net = ResNet.resnet50()

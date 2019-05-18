@@ -34,7 +34,7 @@ class RandomCrop(object):
         else:
             assert len(output_size) == 2
             self.output_size = output_size
-            self.clip = clip
+	self.clip = clip
 
     def __call__(self):
 
@@ -74,80 +74,83 @@ class videoDataset(Dataset):
         self.frames_num = frames_num
         self.xSize = xSize
         self.ySize = ySize
-        self.mean = mean
-        self.std = std
+	self.mean = mean
+	self.std = std
         self.transform = transform
 
     def __len__(self):
         return len(self.clipsList)
     
     def randomCrop(self,frame):
-        h,w = frame.size()[2:]
-        new_h,new_w = self.xSize,self.ySize
+    	h,w = frame.size()[2:]
+	new_h,new_w = self.xSize,self.ySize
 	
-        top = np.random.randint(0 , h - new_h)
+	top = np.random.randint(0 , h - new_h)
 	
-        left = np.random.randint(0 , w - new_w)
+	left = np.random.randint(0 , w - new_w)
 	
-        clip = frame[:,:,top:top + new_h, left:left + new_w]
+	clip = frame[:,:,top:top + new_h, left:left + new_w]
 	
-        normalized_clip = (clip - self.mean)/self.std
-        return normalized_clip
+	normalized_clip = (clip - self.mean)/self.std
+	return normalized_clip
 
     def readVideo(self, videoFile):
         # Open the video file
         cap = cv2.VideoCapture(videoFile)
         nFrames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
-        width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
-        height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
+	width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
+	height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
 	
-        failedClip = False
-        if width == 0 or height == 0 :
-            clips = []
-            failedClip = True
-            print ("%s  size = 0"%videoFile)
-            return clips,failedClip
+	failedClip = False
+	if width == 0 or height == 0 :
+	    clips = []
+	    failedClip = True
+	    print ("%s  size = 0"%videoFile)
+	    return clips,failedClip
 
-        frames = torch.FloatTensor(self.channels, nFrames, height, width)
+	frames = torch.FloatTensor(self.channels, nFrames, height, width)
 	
-        if width < self.xSize or height < self.ySize:
-            failedClip = True
+	if width < self.xSize or height < self.ySize:
+	    failedClip = True
 
-        for f in range(nFrames):
-            ret, frame = cap.read()
-            if ret:
-                frame = torch.from_numpy(frame)
-            # to CHW
-				frame = frame.permute(2,0,1)
-                frames[:,f,:,:] = frame
-            else:
-                print("Skipped!")
-                failedClip = True
-                break
-        # sample 64 clip then drop every other frame
-		#random_nums = (np.random.rand(self.frames_num)*nFrames).astype(np.int32)
-        samples_frames = torch.FloatTensor(self.channels,self.frames_num,height,width)
+	for f in range(nFrames):
+	    ret, frame = cap.read()
+	    if ret:
+		frame = torch.from_numpy(frame)
+		# to CHW
+		frame = frame.permute(2,0,1)
+		frames[:,f,:,:] = frame
+	    else:
+		print("Skipped!")
+		failedClip = True
+		break
+	# sample 64 clip then drop every other frame
+	random_nums = (np.random.rand(self.frames_num)*nFrames).astype(np.int32)
+	samples_frames = torch.FloatTensor(self.channels,self.frames_num,height,width)
 
-        for i in range(self.frames_num):
-            samples_frames[:,i,:,:] = frames[:,random_nums[i],:,:]
+	for i in range(self.frames_num):
+	    samples_frames[:,i,:,:] = frames[:,random_nums[i],:,:]
 	
-        final_frames = torch.FloatTensor(self.channels,32,height,width)
+	final_frames = torch.FloatTensor(self.channels,32,height,width)
 
-        for i in range(32):
-            if i%2 == 0:
-                final_frames[:,i,:,:] = samples_frames[:,i,:,:]
+	for i in range(32):
+	    if i%2 == 0:
+		final_frames[:,i,:,:] = samples_frames[:,i,:,:]
         
-        if failedClip == False:
-            clips = self.randomCrop(final_frames)
-        else:
-            clips = []
+	if failedClip == False:
+	    clips = self.randomCrop(final_frames)
+	else:
+	    clips = []
         return clips, failedClip
 
     def __getitem__(self, idx):
+
+        #videoFile = os.path.join(self.rootDir, self.clipsList[idx][0])
         videoFile = self.clipsList[idx][0]
-        clip, failedClip = self.readVideo(videoFile)
+	#videoFile = '/DATACENTER/5/skye/Kinetics/val_256/dying_hair/I0luMKjIZyg_000422_000432.mp4'
+	clip, failedClip = self.readVideo(videoFile)
 	
-        if self.transform:
+	if self.transform:
             clip = self.transform(clip)
         sample = {'clip': clip, 'label': self.clipsList[idx][1], 'failedClip': failedClip}
 

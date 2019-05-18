@@ -1,7 +1,8 @@
 gen-crop-videos/filter_clipsListFile.hdf5
 gen-crop-videos/waste/clipsListFile.hdf5
+.git/objects/pack/tmp_pack_jFYsQc
+.git/objects/1b/tmp_obj_5HfbvU
+checkpoints/new-ckpts/resnet-50-kinetics.pth
 waste/sample-clipsListFile.hdf5
 waste/filtered_sample.hdf5
 waste/new-clipsListFile.hdf5
-waste/
-gen-crop-videos/waste
